@@ -1,3 +1,22 @@
+import os
+import threading
+from http.server import BaseHTTPRequestHandler, HTTPServer
+
+class HealthCheckHandler(BaseHTTPRequestHandler):
+    def do_GET(self):
+        self.send_response(200)
+        self.end_headers()
+        self.wfile.write(b"Bot is running successfully!")
+
+def run_health_check():
+    # रेंडर (Render) अपने आप एक पोर्ट देता है, नहीं तो डिफ़ॉल्ट 10000 यूज़ होगा
+    port = int(os.environ.get("PORT", 10000))
+    server = HTTPServer(('0.0.0.0', port), HealthCheckHandler)
+    print(f"Starting health check server on port {port}...")
+    server.serve_forever()
+
+# रेंडर के 'Port Timeout' एरर को रोकने के लिए बैकग्राउंड में सर्वर चालू करें
+threading.Thread(target=run_health_check, daemon=True).start()
 import telebot
 from telebot import types
 import requests
